@@ -94,6 +94,21 @@ To get started run
 npm run develop
 ```
 
+## Most used commands
+
+Recommended for Strapi 5.3.0
+
+```
+nvm install 18
+```
+
+```
+nvm use 18
+```
+
+```
+yarn && yarn seed && yarn develop
+```
 
 The @strapi-community/dockerize package is a CLI tool that can be used to generate a Dockerfile and docker-compose.yml file for a Strapi project.
 
@@ -102,6 +117,27 @@ To get started run
 npx @strapi-community/dockerize@latest
 ```
  within an existing Strapi project folder and follow the CLI prompts.
+
+## Docker
+
+Development build
+
+```
+docker build \
+  --build-arg NODE_ENV=development \
+  -t mystrapiapp:latest \
+  .
+```
+
+Production build
+
+```
+docker build \
+  --build-arg NODE_ENV=production \
+  # --build-arg STRAPI_URL=https://api.example.com \ # Uncomment to set the Strapi Server URL
+  -t mystrapiapp:latest \ # Replace with your image name
+  -f Dockerfile.prod .
+```
 
 ---
 
