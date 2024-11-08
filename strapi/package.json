@@ -10,7 +10,7 @@
     "build": "strapi build",
     "strapi": "strapi",
     "deploy": "strapi deploy",
-    "seed": "strapi import -f ./data/export_20241002155953.tar.gz",
+    "seed": "yes | strapi import -f ./export/export_20241002155953.tar.gz",
     "postinstall": "node ./scripts/updateUuid.js"
   },
   "devDependencies": {
