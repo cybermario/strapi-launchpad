@@ -1,0 +1,33 @@
+version: '3'
+services:
+  next:
+    container_name: next
+    build: .
+    image: next:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      WEBSITE_URL: ${WEBSITE_URL}
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://host.docker.internal:1337
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
+    volumes:
+      - ./config:/opt/app/config
+      - ./src:/opt/app/src
+      - ./package.json:/opt/package.json
+      - ./yarn.lock:/opt/yarn.lock
+      - ./.env:/opt/app/.env
+      - ./public:/opt/app/public
+    ports:
+      - '3000:3000'
+    networks:
+      - next
+      
+volumes:
+  next-data:
+
+networks:
+  next:
+    name: Next
+    driver: bridge
