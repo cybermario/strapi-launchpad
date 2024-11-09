@@ -1,0 +1,103 @@
+version: '3'
+services:
+  strapi:
+    container_name: strapi
+    build:
+      context: ./strapi  # Set the path to the Strapi folder
+      dockerfile: Dockerfile  # Make sure this Dockerfile is within the Strapi folder
+    image: strapi:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_CLIENT: ${DATABASE_CLIENT}
+      DATABASE_HOST: strapiDB
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PORT: ${DATABASE_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      NODE_ENV: ${NODE_ENV}
+      IMPORT_DATA: ${IMPORT_DATA}
+    volumes:
+      - ./config:/opt/app/config
+      - ./src:/opt/app/src
+      - ./package.json:/opt/package.json
+      - ./yarn.lock:/opt/yarn.lock
+      - ./.env:/opt/app/.env
+      - ./public:/opt/app/public
+      - ./export:/opt/app/export
+    ports:
+      - '1337:1337'
+    networks:
+      - strapi-next-network
+    depends_on:
+      - strapiDB
+      
+  strapiDB:
+    container_name: strapiDB
+    platform: linux/amd64 #for platform error on Apple M1 chips
+    restart: unless-stopped
+    env_file: .env
+    image: mariadb:latest
+    environment:
+      MYSQL_USER: ${DATABASE_USERNAME}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - strapi-data:/var/lib/mysql
+      #- ./data:/var/lib/postgresql/data/ # if you want to use a bind folder
+    ports:
+      - '3306:3306'
+    networks:
+      - strapi-next-network
+      
+  strapiAdminer:
+    container_name: strapiAdminer
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - '9090:8080'
+    environment:
+      - ADMINER_DEFAULT_SERVER=strapiDB
+    networks:
+      - strapi-next-network
+    depends_on:
+      - strapiDB
+
+  next:
+    container_name: next
+    build:
+      context: ./next  # Set the path to the Next.js folder
+      dockerfile: Dockerfile  # Make sure this Dockerfile is within the Next.js folder
+    image: next:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      WEBSITE_URL: ${WEBSITE_URL}
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://strapi:1337
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
+    volumes:
+      - ./config:/opt/app/config
+      - ./src:/opt/app/src
+      - ./package.json:/opt/package.json
+      - ./yarn.lock:/opt/yarn.lock
+      - ./.env:/opt/app/.env
+      - ./public:/opt/app/public
+    ports:
+      - '3000:3000'
+    networks:
+      - strapi-next-network
+
+volumes:
+  strapi-data:
+  next-data:
+
+networks:
+  strapi-next-network:
+    name: strapi-next
+    driver: bridge
