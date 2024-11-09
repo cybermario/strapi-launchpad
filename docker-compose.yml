@@ -20,13 +20,13 @@ services:
       NODE_ENV: ${NODE_ENV}
       IMPORT_DATA: ${IMPORT_DATA}
     volumes:
-      - ./config:/opt/app/config
-      - ./src:/opt/app/src
-      - ./package.json:/opt/package.json
-      - ./yarn.lock:/opt/yarn.lock
-      - ./.env:/opt/app/.env
-      - ./public:/opt/app/public
-      - ./export:/opt/app/export
+      - ./strapi/config:/opt/app/config
+      - ./strapi/src:/opt/app/src
+      - ./strapi/package.json:/opt/package.json
+      - ./strapi/yarn.lock:/opt/yarn.lock
+      - .env:/opt/app/.env
+      - ./strapi/public:/opt/app/public
+      - ./strapi/export:/opt/app/export
     ports:
       - '1337:1337'
     networks:
@@ -36,7 +36,7 @@ services:
       
   strapiDB:
     container_name: strapiDB
-    platform: linux/amd64 #for platform error on Apple M1 chips
+    platform: linux/amd64  # for platform error on Apple M1 chips
     restart: unless-stopped
     env_file: .env
     image: mariadb:latest
@@ -48,7 +48,6 @@ services:
       MYSQL_ROOT_HOST: '%'
     volumes:
       - strapi-data:/var/lib/mysql
-      #- ./data:/var/lib/postgresql/data/ # if you want to use a bind folder
     ports:
       - '3306:3306'
     networks:
@@ -70,24 +69,25 @@ services:
   next:
     container_name: next
     build:
-      context: ./next  # Set the path to the Next.js folder
-      dockerfile: Dockerfile  # Make sure this Dockerfile is within the Next.js folder
+      context: ./next
+      dockerfile: Dockerfile
     image: next:latest
     restart: unless-stopped
-    env_file: .env
+    env_file: ./next/.env
     environment:
       NODE_ENV: ${NODE_ENV}
       WEBSITE_URL: ${WEBSITE_URL}
       PORT: 3000
-      NEXT_PUBLIC_API_URL: http://strapi:1337
+      # NEXT_PUBLIC_API_URL: http://strapi:1337  # Use the strapi container name as hostname
+      NEXT_PUBLIC_API_URL: http://host.docker.internal:1337
       PREVIEW_SECRET: ${PREVIEW_SECRET}
     volumes:
-      - ./config:/opt/app/config
-      - ./src:/opt/app/src
-      - ./package.json:/opt/package.json
-      - ./yarn.lock:/opt/yarn.lock
-      - ./.env:/opt/app/.env
-      - ./public:/opt/app/public
+      - ./next/config:/opt/app/config
+      - ./next/src:/opt/app/src
+      - ./next/package.json:/opt/package.json
+      - ./next/yarn.lock:/opt/yarn.lock
+      - ./next/.env:/opt/app/.env
+      - ./next/public:/opt/app/public
     ports:
       - '3000:3000'
     networks:
@@ -95,7 +95,6 @@ services:
 
 volumes:
   strapi-data:
-  next-data:
 
 networks:
   strapi-next-network:
