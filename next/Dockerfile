@@ -7,7 +7,7 @@ RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev l
 ARG NODE_ENV=development
 
 ARG WEBSITE_URL=http://localhost:3000 # Add the correct ENV var for this onto your hosting platform, point it to your production website.
-ARG PORT=3000
+ARG NEXT_PORT=3000
 
 ARG NEXT_PUBLIC_API_URL=http://localhost:1337
 ARG PREVIEW_SECRET=the-same-random-token-as-for-strapi
@@ -16,7 +16,7 @@ ARG PREVIEW_SECRET=the-same-random-token-as-for-strapi
 ENV NODE_ENV=${NODE_ENV}
 
 ENV WEBSITE_URL=${WEBSITE_URL}
-ENV PORT=${PORT}
+ENV PORT=${NEXT_PORT}
 
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV PREVIEW_SECRET=${PREVIEW_SECRET}
