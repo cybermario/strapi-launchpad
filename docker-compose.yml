@@ -17,7 +17,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      NODE_ENV: ${NODE_ENV}
+      NODE_ENV: development
       IMPORT_DATA: ${IMPORT_DATA}
     volumes:
       - ./strapi/config:/opt/app/config
@@ -30,7 +30,7 @@ services:
     ports:
       - '1337:1337'
     networks:
-      - strapi-next-network
+      - strapi
     depends_on:
       - strapiDB
       
@@ -48,10 +48,11 @@ services:
       MYSQL_ROOT_HOST: '%'
     volumes:
       - strapi-data:/var/lib/mysql
+      #- ./data:/var/lib/postgresql/data/ # if you want to use a bind folder
     ports:
       - '3306:3306'
     networks:
-      - strapi-next-network
+      - strapi
       
   strapiAdminer:
     container_name: strapiAdminer
@@ -62,7 +63,7 @@ services:
     environment:
       - ADMINER_DEFAULT_SERVER=strapiDB
     networks:
-      - strapi-next-network
+      - strapi
     depends_on:
       - strapiDB
 
@@ -73,12 +74,12 @@ services:
       dockerfile: Dockerfile
     image: next:latest
     restart: unless-stopped
-    env_file: ./next/.env
+    env_file: .env
     environment:
-      NODE_ENV: ${NODE_ENV}
+      NODE_ENV: production
       WEBSITE_URL: ${WEBSITE_URL}
       PORT: 3000
-      # NEXT_PUBLIC_API_URL: http://strapi:1337  # Use the strapi container name as hostname
+      #NEXT_PUBLIC_API_URL: http://strapi:1337  # Use the strapi container name as hostname
       NEXT_PUBLIC_API_URL: http://host.docker.internal:1337
       PREVIEW_SECRET: ${PREVIEW_SECRET}
     volumes:
@@ -86,17 +87,20 @@ services:
       - ./next/src:/opt/app/src
       - ./next/package.json:/opt/package.json
       - ./next/yarn.lock:/opt/yarn.lock
-      - ./next/.env:/opt/app/.env
+      - .env:/opt/app/.env
       - ./next/public:/opt/app/public
     ports:
       - '3000:3000'
     networks:
-      - strapi-next-network
+      - next
 
 volumes:
   strapi-data:
 
 networks:
-  strapi-next-network:
-    name: strapi-next
+  strapi:
+    name: Strapi
+    driver: bridge
+  next:
+    name: Next
     driver: bridge
